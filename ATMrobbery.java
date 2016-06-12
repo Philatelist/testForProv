@@ -17,10 +17,11 @@ public class ATMrobbery {
         fillArray();
 
         while (amount.size() > 0) {
-                System.out.println("");
-                System.out.println("What do You need?");
-                System.out.println("For get money, type \"A\". For check denominations in ATM, type \"B\"");
-                inputChoice();}
+            System.out.println("");
+            System.out.println("What do You need?");
+            System.out.println("For get money, type \"A\". For check denominations in ATM, type \"B\"");
+            inputChoice();
+        }
     }
 
     private static void inputChoice() throws IOException {
@@ -29,7 +30,7 @@ public class ATMrobbery {
             case "A":
                 System.out.println("How much money do You need?");
                 BufferedReader money = new BufferedReader(new InputStreamReader(System.in));
-                giveMoney(Integer.parseInt(money.readLine()));
+                isHaveRequiredAmount(money.readLine());
                 break;
             case "B":
                 getAmountNominals();
@@ -51,20 +52,47 @@ public class ATMrobbery {
         }
     }
 
-    private static void giveMoney(int money) throws IOException {
+    private static void isHaveRequiredAmount(String money) throws IOException {
+        if (!checkString(money) || Integer.parseInt(money) <= 0) {
+            System.out.println("Are You realy want money?");
+            System.out.println("How much money do You need?");
+            BufferedReader newSelect = new BufferedReader(new InputStreamReader(System.in));
+            isHaveRequiredAmount(newSelect.readLine());
+        } else {
+            isHaveMoney(Integer.parseInt(money));
+        }
+    }
 
-        if (!isCanGetMoney(money)){
+    private static boolean checkString(String string) {
+        try {
+            Integer.parseInt(string);
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    private static void isHaveMoney(int money) throws IOException {
+
+        if (!isCanGetMoney(money) && money > 0) {
             System.out.println("ATM can not give the required amount. " +
                     "Please select one of the following amounts: " +
                     (money - (money % nominals.get(0))) + " UAH, or " +
                     (money - (money % nominals.get(0)) + nominals.get(0)) + " UAH.");
             BufferedReader newSelect = new BufferedReader(new InputStreamReader(System.in));
-            giveMoney(Integer.parseInt(newSelect.readLine()));
-        }
-
-        else if (money > getSum()) {
-            System.out.println("ATM doesn`t have much money");
+            isHaveRequiredAmount(newSelect.readLine());
         } else {
+            giveMoney(money);
+        }
+    }
+
+    private static void giveMoney(int money) throws IOException {
+        if (money > getSum()) {
+            System.out.println("ATM doesn`t have much money");
+        } else if (money <= 0) {
+            isHaveRequiredAmount(Integer.toString(money));
+        }
+        else {
             int k = amount.size() - 1;
             while (k >= 0)
                 if (nominals.get(k) > money) {
@@ -106,7 +134,8 @@ public class ATMrobbery {
             if (nominalsToIssue.size() == 0) {
                 nominalsToIssue.add(banknotes);
                 amountToIssue.add(1);
-            } if (nominalsToIssue.get(j) == banknotes) {
+            }
+            if (nominalsToIssue.get(j) == banknotes) {
                 amountToIssue.set(j, (amountToIssue.get(j) + 1));
             }
         }
